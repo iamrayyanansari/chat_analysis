@@ -2,15 +2,15 @@ import re
 import pandas as pd
 
 
-def preprocess(data):
-    pattern = '\d{1,2}/\d{1,2}/\d{2},\s\d{1,2}:\d{2}\s(?:AM|PM)\s-'
+def preprocess(data) :
+    pattern = '\d{1,2}/\d{1,2}/\d{2},\s\d{1,2}:\d{2}'
+    message = re.split(pattern, data)[1 :]
 
-    message = re.split(pattern, data)[1:]
     dates = re.findall(pattern, data)
-    df = pd.DataFrame({'user_message': message, 'message_date': dates})
 
+    df = pd.DataFrame({'user_message' : message, 'message_date' : dates})
     # convert message_date type
-    df['message_date'] = pd.to_datetime(df['message_date'], format='%m/%d/%y, %I:%M\u202f%p -')
+    df['message_date'] = pd.to_datetime(df['message_date'], format='%m/%d/%y, %H:%M')
 
     users = []
     messages = []

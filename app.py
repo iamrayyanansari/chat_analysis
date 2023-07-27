@@ -14,19 +14,22 @@ if uploaded_file is not None:
 
     #fetch unique users
     user_list = df['user'].unique().tolist()
-    user_list.remove('group_notification')
-    user_list.sort()
-    user_list.insert(0,"Overall")
 
-    selected_user=st.sidebar.selectbox("Show analysis wrt",user_list)
+    if 'group_notification' in user_list:
+        user_list.remove('group_notification')
+    else:
+        print(df)
+    user_list.sort()
+    user_list.insert(0, "Overall")
+
+    selected_user = st.sidebar.selectbox("Show analysis wrt", user_list)
 
     st.dataframe(df)
 
-
     if st.sidebar.button("Show Analysis"):
-        num_messages,words,num_media_messages,num_links =helper.fetch_stats(selected_user,df)
+        num_messages, words, num_media_messages, num_links = helper.fetch_stats(selected_user, df)
         st.title("Top Statistics")
-        col1,col2,col3,col4 =st.columns(4)
+        col1, col2, col3, col4 = st.columns(4)
 
         with col1:
             st.header("Total Message")
@@ -94,37 +97,31 @@ if uploaded_file is not None:
 
             with col2:
                 st.dataframe(new_df)
-        st.title("WordCloud")
+        if selected_user != "Overall" :
+            st.title("WordCloud for " + selected_user)
+        else :
+            st.title("Overall WordCloud")
+
         df_wc = helper.create_wordcloud(selected_user, df)
         fig, ax = plt.subplots()
         ax.imshow(df_wc)
         st.pyplot(fig)
 
-
-        # most common words
-        most_common_df = helper.most_common_words(selected_user,df)
-
+        st.title("Most Common Words")
+        most_common_df = helper.most_common_words(selected_user, df)
         st.dataframe(most_common_df)
-        fig,ax = plt.subplots()
-        ax.barh(most_common_df['Word'],most_common_df['Frequency'])
 
-        plt.xticks(rotation = 'vertical')
-
-        st.title("most common words")
+        fig, ax = plt.subplots()
+        ax.barh(most_common_df['Word'], most_common_df['Frequency'])
+        plt.xticks(rotation='vertical')
         st.pyplot(fig)
-
         emoji_df = helper.emoji_helper(selected_user,df)
-        st.title("emoji Analysis")
-        col1,col2 = st.columns(2)
-        with col1:
-            st.dataframe(emoji_df)
-        with col2:
-            fig,ax = plt.subplots()
-            ax.pie(emoji_df['Count'].head(),labels = emoji_df["Emoji"].head(),autopct="%0.2f")
+        st.title("Emoji Analysis")
+        emoji_df = helper.emoji_helper(selected_user, df)
+        st.dataframe(emoji_df)
 
-            st.pyplot(fig)
-
-
-
+        fig, ax = plt.subplots()
+        ax.pie(emoji_df['Count'].head(), labels=emoji_df["Emoji"].head(), autopct="%0.2f")
+        st.pyplot(fig)
 
 

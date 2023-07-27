@@ -31,23 +31,26 @@ def most_busy_users(df):
     return x,df
 
 def create_wordcloud(selected_user, df):
-    f = open('stop_hinglish.txt','r')
+    f = open('stop_hinglish.txt', 'r')
     stop_words = f.read()
     if selected_user != "Overall":
         df = df[df['user'] == selected_user]
 
     temp = df[df['user'] != 'group_notification']
-    temp = temp[temp['message'] !=  '<Media omitted>\n']
+    temp = temp[temp['message'] != '<Media omitted>\n']
 
     def remove_stop_words(message):
-        y =[]
+        y = []
         for word in message.lower().split():
             if word not in stop_words:
                 y.append(word)
-            return " ".join(y)
-    wc = WordCloud(width= 500,height=500,min_font_size=10,background_color='white')
+        return " ".join(y)
+
+    # Using .loc to set the values directly without warning
     temp['message'] = temp['message'].apply(remove_stop_words)
-    df_wc = wc.generate(temp['message'].str.cat(sep= " "))
+
+    wc = WordCloud(width=500, height=500, min_font_size=10, background_color='white')
+    df_wc = wc.generate(temp['message'].str.cat(sep=" "))
     return df_wc
 
 
@@ -118,8 +121,16 @@ def month_activity_map(selected_user,df):
     if selected_user != 'Overall':
         df = df[df['user'] == selected_user]
     return df['month'].value_counts()
-def activity_heatmap(selected_user,df):
+
+def activity_heatmap(selected_user, df):
     if selected_user != 'Overall':
         df = df[df['user'] == selected_user]
-    user_heatmap = df.pivot_table(index="day_name",columns="period",values="message",aggfunc='count').fillna(0)
+
+    user_heatmap = df.pivot_table(index="day_name", columns="period", values="message", aggfunc='count').fillna(0)
+
+    # Check if the user_heatmap DataFrame is empty
+    if user_heatmap.empty:
+        # Return None or any other appropriate value or message as per your requirement
+        return None
+
     return user_heatmap
